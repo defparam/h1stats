@@ -210,9 +210,6 @@ def get_programinfo(token):
                     dslr = "N/A"
                 
                 f.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(name,url,state,clear,offers,bounty_splitting,maxcrit,maxhigh,maxmed,maxlow,abua,abla,tbua,tbla,rrc,rrc90,tbp,tbp90,frt,tt,bt,rt,progage,dslr,invacc))
-            break
-        
-        
             
 
 
