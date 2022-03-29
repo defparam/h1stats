@@ -154,26 +154,32 @@ def get_programinfo(token):
                 else:
                     tbp90 = "0"
                     
-                    
-                if edge["node"]["most_recent_sla_snapshot"]["first_response_time"] != None:
-                    frt = str(edge["node"]["most_recent_sla_snapshot"]["first_response_time"])
+                if edge["node"]["most_recent_sla_snapshot"] != None:   
+                    if edge["node"]["most_recent_sla_snapshot"]["first_response_time"] != None:
+                        frt = str(edge["node"]["most_recent_sla_snapshot"]["first_response_time"])
+                    else:
+                        frt = "0.0"
+                        
+                    if edge["node"]["most_recent_sla_snapshot"]["triage_time"] != None:
+                        tt = str(edge["node"]["most_recent_sla_snapshot"]["triage_time"])
+                    else:
+                        tt = "0.0"
+                        
+                    if edge["node"]["most_recent_sla_snapshot"]["bounty_time"] != None:
+                        bt = str(edge["node"]["most_recent_sla_snapshot"]["bounty_time"])
+                    else:
+                        bt = "0.0"
+                        
+                    if edge["node"]["most_recent_sla_snapshot"]["resolution_time"] != None:
+                        rt = str(edge["node"]["most_recent_sla_snapshot"]["resolution_time"])
+                    else:
+                        rt = "0.0"
                 else:
                     frt = "0.0"
-                    
-                if edge["node"]["most_recent_sla_snapshot"]["triage_time"] != None:
-                    tt = str(edge["node"]["most_recent_sla_snapshot"]["triage_time"])
-                else:
                     tt = "0.0"
-                    
-                if edge["node"]["most_recent_sla_snapshot"]["bounty_time"] != None:
-                    bt = str(edge["node"]["most_recent_sla_snapshot"]["bounty_time"])
-                else:
                     bt = "0.0"
-                    
-                if edge["node"]["most_recent_sla_snapshot"]["resolution_time"] != None:
-                    rt = str(edge["node"]["most_recent_sla_snapshot"]["resolution_time"])
-                else:
                     rt = "0.0"
+                    
                     
                     
                 rrc = edge["node"]["resolved_report_count"]
