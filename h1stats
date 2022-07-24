@@ -77,8 +77,8 @@ def get_programinfo(token):
     else:
         filename = "h1stats-PRIVATE-%s.csv"%(str(int(time.time())))
         
-    with open(filename,"w") as f:
-        f.write("Program Name,URL,Program Type,Clear Program,Offers Bounties,Bounty Splitting,Max Critical,Max High,Max Medium,Max Low,Average Bounty Max,Average Bounty Min,Top Bounty Max,Top Bounty Min,Resolved Reports,Reports Received in 90 Days,Total Bounties Paid (USD),Total Bounties Paid in 90 Days (USD),Avg Time to First Response (Hours),Avg Time to Triage (Hours),Avg Time to Bounty (Hours),Avg Time to Resolution (Hours),Progam Age (Months),Days Since Last Report,Invitation Accepted Days\n")
+    with open(filename,"wb") as f:
+        f.write("Program Name,URL,Program Type,Clear Program,Offers Bounties,Bounty Splitting,Max Critical,Max High,Max Medium,Max Low,Average Bounty Max,Average Bounty Min,Top Bounty Max,Top Bounty Min,Resolved Reports,Reports Received in 90 Days,Total Bounties Paid (USD),Total Bounties Paid in 90 Days (USD),Avg Time to First Response (Hours),Avg Time to Triage (Hours),Avg Time to Bounty (Hours),Avg Time to Resolution (Hours),Progam Age (Months),Days Since Last Report,Invitation Accepted Days\n".encode('utf8'))
         progcount = 0
         while(1):
             query["variables"]["cursor"] = last_cursor
@@ -217,7 +217,7 @@ def get_programinfo(token):
                 except:
                     dslr = "N/A"
                 
-                f.write("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(name,url,state,clear,offers,bounty_splitting,maxcrit,maxhigh,maxmed,maxlow,abua,abla,tbua,tbla,rrc,rrc90,tbp,tbp90,frt,tt,bt,rt,progage,dslr,invacc))
+                f.write(("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(name,url,state,clear,offers,bounty_splitting,maxcrit,maxhigh,maxmed,maxlow,abua,abla,tbua,tbla,rrc,rrc90,tbp,tbp90,frt,tt,bt,rt,progage,dslr,invacc)).encode('utf8'))
             
 
 
