@@ -8,6 +8,7 @@ Data Collected:
  - Program Type (Public or Private)
  - Clear Program (Yes/No)
  - Offers Bounties (Yes/No)
+ - Bounty Splitting (Yes/No)
  - Max Critical (USD)
  - Max High (USD)
  - Max Medium (USD)
@@ -27,8 +28,15 @@ Data Collected:
  - Progam Age (Months)
  - Days Since Last Report
 
+## Install
+Due to HackerOne API changes requiring a CSRF token to make GraphQL API requests, this tool now uses BeautifulSoup 4 to parse the HTML and retrieve the CSRF token. To install this dependency:
+
+```
+pip install -r requirements.txt
+```
+
 ## Usage
-normal usage (public programs):
+normal usage (public programs): (Note: As of the end of 2022, this no longer works - you _must_ supply a valid token of an authenticated session)
 **python3 h1stats**
 
 authenticated usage (public and private programs):
@@ -43,24 +51,6 @@ For authenticated usage It is suggested that you assign your token into a variab
 
 
 ## Examples
-Normal Flow (Public Only):
-```
-bash> python3 h1stats
-  _     _ ____  _        _
- | |__ / / ___|| |_ __ _| |_ ___
- | '_ \| \___ \| __/ _` | __/ __|
- | | | | |___) | || (_| | |_\__ \
- |_| |_|_|____/ \__\__,_|\__|___/
-
-                      defparam
-
-[+] No session cookie specified
-[+] Collecting public data...
-[+] Please wait... (this may take several minutes)
-[+] Collecting... (350 programs)
-[+] Wrote all data to: h1stats-2021-4-24.csv
-[+] Done!
-```
 Authenticated Flow (Public and Private):
 ```
 bash> export H1CRED="JGH92kd9...b5e" # HackerOne session cookie

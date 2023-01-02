@@ -32,37 +32,65 @@ import base64
 import json
 import time
 from datetime import datetime
+# used for parsing of the program HTML pages to grab React JSON data because there is no API :(
+from bs4 import BeautifulSoup
 
 def diff_month(d1, d2):
     return (d1.year - d2.year) * 12 + d1.month - d2.month
 
-def get_h1_graphql_token(hostsession):
+def get_csrf_token(hostsession):
+    print("[+] Getting CSRF token, if you get an error here it likely means you don't have a valid session cookie")
     hdrs = {"Cookie": "__Host-session="+hostsession,
     "Content-type": "application/json", 
     "Host": "hackerone.com",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
     "Accept": "*/*"}
-    resp = requests.get('https://hackerone.com/current_user/graphql_token',headers=hdrs)
-    jsn = json.loads(resp.text)
-    if (jsn['graphql_token'] == "----"):
-        print("[+] Warning: could not obtain graphql token from session, reverting to public only...")
-        return None
-    return jsn['graphql_token']
+    resp = requests.get('https://hackerone.com/opportunities/all',headers=hdrs)
+    soup = BeautifulSoup(resp.text, features="lxml")
+    csrf_token_tag = soup.find("meta", attrs={"name":"csrf-token"})
+    csrf_token = csrf_token_tag['content']
+    if csrf_token is None or csrf_token == "":
+        print("[!] Missing CSRF token, can't continue without further errors!")
+        exit(1)
+    else:
+        print("[+] Successfully retrieved CSRF token")
 
-def get_programinfo(token):
+    return csrf_token
+
+
+def get_programinfo(token, csrf_token):
     H1_XAUTH_TOKEN = token
-    PRIV_PROG_QUERY = "ewogICAgIm9wZXJhdGlvbk5hbWUiOiAiTXlQcm9ncmFtc1F1ZXJ5IiwKICAgICJ2YXJpYWJsZXMiOiB7CiAgICAgICAgIndoZXJlIjp7InN1Ym1pc3Npb25fc3RhdGUiOnsiX2VxIjoib3BlbiJ9fSwKICAgICAgICAiY291bnQiOiA1MCwKICAgICAgICAib3JkZXJCeSI6IG51bGwsCiAgICAgICAgInNlY3VyZU9yZGVyQnkiOiB7CiAgICAgICAgICAgICJzdGFydGVkX2FjY2VwdGluZ19hdCI6IHsKICAgICAgICAgICAgICAgICJfZGlyZWN0aW9uIjogIkRFU0MiCiAgICAgICAgICAgIH0KICAgICAgICB9LAogICAgICAgICJjdXJzb3IiOiAiIgogICAgfSwKICAgICJxdWVyeSI6ICJxdWVyeSBNeVByb2dyYW1zUXVlcnkoJGN1cnNvcjogU3RyaW5nLCAkY291bnQ6IEludCwgJHdoZXJlOiBGaWx0ZXJzVGVhbUZpbHRlcklucHV0LCAkb3JkZXJCeTogVGVhbU9yZGVySW5wdXQsICRzZWN1cmVPcmRlckJ5OiBGaWx0ZXJzVGVhbUZpbHRlck9yZGVyKSB7XG4gIG1lIHtcbiAgICBpZFxuICAgIC4uLk15SGFja2VyT25lU3ViSGVhZGVyXG4gICAgX190eXBlbmFtZVxuICB9XG4gIHRlYW1zKGZpcnN0OiAkY291bnQsIGFmdGVyOiAkY3Vyc29yLCBvcmRlcl9ieTogJG9yZGVyQnksIHNlY3VyZV9vcmRlcl9ieTogJHNlY3VyZU9yZGVyQnksIHdoZXJlOiAkd2hlcmUpIHtcbiAgICBwYWdlSW5mbyB7XG4gICAgICBlbmRDdXJzb3JcbiAgICAgIGhhc05leHRQYWdlXG4gICAgICBfX3R5cGVuYW1lXG4gICAgfVxuICAgIGVkZ2VzIHtcbiAgICAgIGN1cnNvclxuICAgICAgbm9kZSB7XG4gICAgICAgIGlkXG4gICAgICAgIGhhbmRsZVxuICAgICAgICBuYW1lXG4gICAgICAgIGN1cnJlbmN5XG4gICAgICAgIHRlYW1fcHJvZmlsZV9waWN0dXJlOiBwcm9maWxlX3BpY3R1cmUoc2l6ZTogbWVkaXVtKVxuICAgICAgICBzdWJtaXNzaW9uX3N0YXRlXG4gICAgICAgIHRyaWFnZV9hY3RpdmVcbiAgICAgICAgdXJsXG4gICAgICAgIG9mZmVyc19ib3VudGllc1xuICAgICAgYWxsb3dzX2JvdW50eV9zcGxpdHRpbmdcbiAgYXZlcmFnZV9ib3VudHlfbG93ZXJfYW1vdW50XG4gICAgICAgIGF2ZXJhZ2VfYm91bnR5X3VwcGVyX2Ftb3VudFxuICAgICAgICB0b3BfYm91bnR5X2xvd2VyX2Ftb3VudFxuICAgICAgICB0b3BfYm91bnR5X3VwcGVyX2Ftb3VudFxuICAgICAgICBmb3JtYXR0ZWRfdG90YWxfYm91bnRpZXNfcGFpZF9wcmVmaXhcbiAgICAgICAgZm9ybWF0dGVkX3RvdGFsX2JvdW50aWVzX3BhaWRfYW1vdW50XG4gICAgICAgIHJlc29sdmVkX3JlcG9ydF9jb3VudFxuICAgICAgICBmb3JtYXR0ZWRfYm91bnRpZXNfcGFpZF9sYXN0XzkwX2RheXNcbiAgICAgICAgcmVwb3J0c19yZWNlaXZlZF9sYXN0XzkwX2RheXNcbiAgICAgICAgbGFzdF9yZXBvcnRfcmVzb2x2ZWRfYXRcbiBtb3N0X3JlY2VudF9zbGFfc25hcHNob3Qge1xuICAgIGlkXG4gICAgZmlyc3RfcmVzcG9uc2VfdGltZTogYXZlcmFnZV90aW1lX3RvX2ZpcnN0X3Byb2dyYW1fcmVzcG9uc2VcbiAgICB0cmlhZ2VfdGltZTogYXZlcmFnZV90aW1lX3RvX3JlcG9ydF90cmlhZ2VcbiAgICBib3VudHlfdGltZTogYXZlcmFnZV90aW1lX3RvX2JvdW50eV9hd2FyZGVkXG4gICAgcmVzb2x1dGlvbl90aW1lOiBhdmVyYWdlX3RpbWVfdG9fcmVwb3J0X3Jlc29sdmVkXG4gICAgX190eXBlbmFtZVxuICB9XG4gICAgICAgIG9ubHlfY2xlYXJlZF9oYWNrZXJzXG4gICAgICAgIHN0YXRlXG4gICAgICAgIHN0YXJ0ZWRfYWNjZXB0aW5nX2F0XG4gICAgICAgIG51bWJlcl9vZl9yZXBvcnRzX2Zvcl91c2VyXG4gICAgICAgIG51bWJlcl9vZl92YWxpZF9yZXBvcnRzX2Zvcl91c2VyXG4gICAgICAgIGJvdW50eV9lYXJuZWRfZm9yX3VzZXJcbiAgICAgICAgbGFzdF9pbnZpdGF0aW9uX2FjY2VwdGVkX2F0X2Zvcl91c2VyXG4gICAgICAgIGJvb2ttYXJrZWRcbiAgICAgICAgZXh0ZXJuYWxfcHJvZ3JhbSB7XG4gICAgICAgICAgaWRcbiAgICAgICAgICBfX3R5cGVuYW1lXG4gICAgICAgIH1cbiAgICAgICAgLi4uVGVhbUxpbmtXaXRoTWluaVByb2ZpbGVcbiAgICAgICAgLi4uVGVhbVRhYmxlQXZlcmFnZUJvdW50eVxuICAgICAgICAuLi5Cb3VudHlUYWJsZVRlYW1cbiAgICAgICAgLi4uVGVhbVRhYmxlTWluaW11bUJvdW50eVxuICAgICAgICAuLi5UZWFtVGFibGVSZXNvbHZlZFJlcG9ydHNcbiAgICAgICAgX190eXBlbmFtZVxuICAgICAgfVxuICAgICAgX190eXBlbmFtZVxuICAgIH1cbiAgICBfX3R5cGVuYW1lXG4gIH1cbn1cblxuZnJhZ21lbnQgQm91bnR5VGFibGVUZWFtIG9uIFRlYW0ge1xuICBpZFxuICBoYW5kbGVcbiAgYm91bnR5X3RhYmxlIHtcbiAgICBpZFxuICAgIGxvd19sYWJlbFxuICAgIG1lZGl1bV9sYWJlbFxuICAgIGhpZ2hfbGFiZWxcbiAgICBjcml0aWNhbF9sYWJlbFxuICAgIGRlc2NyaXB0aW9uXG4gICAgICAgIGJvdW50eV90YWJsZV9yb3dzKGZpcnN0OiAxMDApIHtcbiAgICAgIGVkZ2VzIHtcbiAgICAgICAgbm9kZSB7XG4gICAgICAgICAgaWRcbiAgICAgICAgICBsb3dcbiAgICAgICAgICBtZWRpdW1cbiAgICAgICAgICBoaWdoXG4gICAgICAgICAgY3JpdGljYWxcbiAgICAgICAgICBzbWFydF9yZXdhcmRzX3N0YXJ0X2F0XG4gICAgICAgICAgc3RydWN0dXJlZF9zY29wZSB7XG4gICAgICAgICAgICBpZFxuICAgICAgICAgICAgYXNzZXRfaWRlbnRpZmllclxuICAgICAgICAgICAgX190eXBlbmFtZVxuICAgICAgICAgIH1cbiAgICAgICAgICB1cGRhdGVkX2F0XG4gICAgICAgICAgX190eXBlbmFtZVxuICAgICAgICB9XG4gICAgICAgIF9fdHlwZW5hbWVcbiAgICAgIH1cbiAgICAgIF9fdHlwZW5hbWVcbiAgICB9XG4gICAgdXBkYXRlZF9hdFxuICAgIF9fdHlwZW5hbWVcbiAgfVxuICBfX3R5cGVuYW1lXG59XG5cblxuXG5mcmFnbWVudCBUZWFtTGlua1dpdGhNaW5pUHJvZmlsZSBvbiBUZWFtIHtcbiAgaWRcbiAgaGFuZGxlXG4gIG5hbWVcbiAgX190eXBlbmFtZVxufVxuXG5mcmFnbWVudCBUZWFtVGFibGVBdmVyYWdlQm91bnR5IG9uIFRlYW0ge1xuICBpZFxuICBjdXJyZW5jeVxuICBhdmVyYWdlX2JvdW50eV9sb3dlcl9hbW91bnRcbiAgYXZlcmFnZV9ib3VudHlfdXBwZXJfYW1vdW50XG4gIF9fdHlwZW5hbWVcbn1cblxuZnJhZ21lbnQgVGVhbVRhYmxlTWluaW11bUJvdW50eSBvbiBUZWFtIHtcbiAgaWRcbiAgY3VycmVuY3lcbiAgYmFzZV9ib3VudHlcbiAgX190eXBlbmFtZVxufVxuXG5mcmFnbWVudCBUZWFtVGFibGVSZXNvbHZlZFJlcG9ydHMgb24gVGVhbSB7XG4gIGlkXG4gIHJlc29sdmVkX3JlcG9ydF9jb3VudFxuICBfX3R5cGVuYW1lXG59XG5cbmZyYWdtZW50IE15SGFja2VyT25lU3ViSGVhZGVyIG9uIFVzZXIge1xuICBpZFxuICBoYXNfY2hlY2tsaXN0X2NoZWNrX3Jlc3BvbnNlc1xuICBzb2Z0X2xhdW5jaF9pbnZpdGF0aW9ucyhzdGF0ZTogb3Blbikge1xuICAgIHRvdGFsX2NvdW50XG4gICAgX190eXBlbmFtZVxuICB9XG4gIF9fdHlwZW5hbWVcbn1cbiIKfQoKCgo="
-    pmnhPRIV_PROG_QUERY = "ewogICAgIm9wZXJhdGlvbk5hbWUiOiAiTXlQcm9ncmFtc1F1ZXJ5IiwKICAgICJ2YXJpYWJsZXMiOiB7CiAgICAgICAgIndoZXJlIjp7InN1Ym1pc3Npb25fc3RhdGUiOnsiX2VxIjoib3BlbiJ9fSwKICAgICAgICAiY291bnQiOiA1MCwKICAgICAgICAib3JkZXJCeSI6IG51bGwsCiAgICAgICAgInNlY3VyZU9yZGVyQnkiOiB7CiAgICAgICAgICAgICJzdGFydGVkX2FjY2VwdGluZ19hdCI6IHsKICAgICAgICAgICAgICAgICJfZGlyZWN0aW9uIjogIkRFU0MiCiAgICAgICAgICAgIH0KICAgICAgICB9LAogICAgICAgICJjdXJzb3IiOiAiIgogICAgfSwKICAgICJxdWVyeSI6ICJxdWVyeSBNeVByb2dyYW1zUXVlcnkoJGN1cnNvcjogU3RyaW5nLCAkY291bnQ6IEludCwgJHdoZXJlOiBGaWx0ZXJzVGVhbUZpbHRlcklucHV0LCAkb3JkZXJCeTogVGVhbU9yZGVySW5wdXQsICRzZWN1cmVPcmRlckJ5OiBGaWx0ZXJzVGVhbUZpbHRlck9yZGVyKSB7XG4gIG1lIHtcbiAgICBpZFxuICAgIC4uLk15SGFja2VyT25lU3ViSGVhZGVyXG4gICAgX190eXBlbmFtZVxuICB9XG4gIHRlYW1zKGZpcnN0OiAkY291bnQsIGFmdGVyOiAkY3Vyc29yLCBvcmRlcl9ieTogJG9yZGVyQnksIHNlY3VyZV9vcmRlcl9ieTogJHNlY3VyZU9yZGVyQnksIHdoZXJlOiAkd2hlcmUpIHtcbiAgICBwYWdlSW5mbyB7XG4gICAgICBlbmRDdXJzb3JcbiAgICAgIGhhc05leHRQYWdlXG4gICAgICBfX3R5cGVuYW1lXG4gICAgfVxuICAgIGVkZ2VzIHtcbiAgICAgIGN1cnNvclxuICAgICAgbm9kZSB7XG4gICAgICAgIGlkXG4gICAgICAgIGhhbmRsZVxuICAgICAgICBuYW1lXG4gICAgICAgIGN1cnJlbmN5XG4gICAgICAgIHRlYW1fcHJvZmlsZV9waWN0dXJlOiBwcm9maWxlX3BpY3R1cmUoc2l6ZTogbWVkaXVtKVxuICAgICAgICBzdWJtaXNzaW9uX3N0YXRlXG4gICAgICAgIHRyaWFnZV9hY3RpdmVcbiAgICAgICAgdXJsXG4gICAgICAgIG9mZmVyc19ib3VudGllc1xuICAgICAgYWxsb3dzX2JvdW50eV9zcGxpdHRpbmdcbiAgYXZlcmFnZV9ib3VudHlfbG93ZXJfYW1vdW50XG4gICAgICAgIGF2ZXJhZ2VfYm91bnR5X3VwcGVyX2Ftb3VudFxuICAgICAgICB0b3BfYm91bnR5X2xvd2VyX2Ftb3VudFxuICAgICAgICB0b3BfYm91bnR5X3VwcGVyX2Ftb3VudFxuICAgICAgICBmb3JtYXR0ZWRfdG90YWxfYm91bnRpZXNfcGFpZF9wcmVmaXhcbiAgICAgICAgZm9ybWF0dGVkX3RvdGFsX2JvdW50aWVzX3BhaWRfYW1vdW50XG4gICAgICAgIHJlc29sdmVkX3JlcG9ydF9jb3VudFxuICAgICAgICBmb3JtYXR0ZWRfYm91bnRpZXNfcGFpZF9sYXN0XzkwX2RheXNcbiAgICAgICAgcmVwb3J0c19yZWNlaXZlZF9sYXN0XzkwX2RheXNcbiAgICAgICAgbGFzdF9yZXBvcnRfcmVzb2x2ZWRfYXRcbiBtb3N0X3JlY2VudF9zbGFfc25hcHNob3Qge1xuICAgIGlkXG4gICAgZmlyc3RfcmVzcG9uc2VfdGltZTogYXZlcmFnZV90aW1lX3RvX2ZpcnN0X3Byb2dyYW1fcmVzcG9uc2VcbiAgICB0cmlhZ2VfdGltZTogYXZlcmFnZV90aW1lX3RvX3JlcG9ydF90cmlhZ2VcbiAgICBib3VudHlfdGltZTogYXZlcmFnZV90aW1lX3RvX2JvdW50eV9hd2FyZGVkXG4gICAgcmVzb2x1dGlvbl90aW1lOiBhdmVyYWdlX3RpbWVfdG9fcmVwb3J0X3Jlc29sdmVkXG4gICAgX190eXBlbmFtZVxuICB9XG4gICAgICAgIG9ubHlfY2xlYXJlZF9oYWNrZXJzXG4gICAgICAgIHN0YXRlXG4gICAgICAgIHN0YXJ0ZWRfYWNjZXB0aW5nX2F0XG4gICAgICAgIG51bWJlcl9vZl9yZXBvcnRzX2Zvcl91c2VyXG4gICAgICAgIG51bWJlcl9vZl92YWxpZF9yZXBvcnRzX2Zvcl91c2VyXG4gICAgICAgIGJvdW50eV9lYXJuZWRfZm9yX3VzZXJcbiAgICAgICAgbGFzdF9pbnZpdGF0aW9uX2FjY2VwdGVkX2F0X2Zvcl91c2VyXG4gICAgICAgIGJvb2ttYXJrZWRcbiAgICAgICAgZXh0ZXJuYWxfcHJvZ3JhbSB7XG4gICAgICAgICAgaWRcbiAgICAgICAgICBfX3R5cGVuYW1lXG4gICAgICAgIH1cbiAgICAgICAgLi4uVGVhbUxpbmtXaXRoTWluaVByb2ZpbGVcbiAgICAgICAgLi4uVGVhbVRhYmxlQXZlcmFnZUJvdW50eVxuICAgICAgICAuLi5Cb3VudHlUYWJsZVRlYW1cbiAgICAgICAgLi4uVGVhbVRhYmxlTWluaW11bUJvdW50eVxuICAgICAgICAuLi5UZWFtVGFibGVSZXNvbHZlZFJlcG9ydHNcbiAgICAgICAgX190eXBlbmFtZVxuICAgICAgfVxuICAgICAgX190eXBlbmFtZVxuICAgIH1cbiAgICBfX3R5cGVuYW1lXG4gIH1cbn1cblxuZnJhZ21lbnQgQm91bnR5VGFibGVUZWFtIG9uIFRlYW0ge1xuICBpZFxuICBoYW5kbGVcbiAgYm91bnR5X3RhYmxlIHtcbiAgICBpZFxuICAgIGxvd19sYWJlbFxuICAgIG1lZGl1bV9sYWJlbFxuICAgIGhpZ2hfbGFiZWxcbiAgICBjcml0aWNhbF9sYWJlbFxuICAgIGRlc2NyaXB0aW9uXG4gICAgICAgIGJvdW50eV90YWJsZV9yb3dzKGZpcnN0OiAxMDApIHtcbiAgICAgIGVkZ2VzIHtcbiAgICAgICAgbm9kZSB7XG4gICAgICAgICAgaWRcbiAgICAgICAgICBsb3dcbiAgICAgICAgICBtZWRpdW1cbiAgICAgICAgICBoaWdoXG4gICAgICAgICAgY3JpdGljYWxcbiAgICAgICAgICBzbWFydF9yZXdhcmRzX3N0YXJ0X2F0XG4gICAgICAgICAgc3RydWN0dXJlZF9zY29wZSB7XG4gICAgICAgICAgICBpZFxuICAgICAgICAgICAgYXNzZXRfaWRlbnRpZmllclxuICAgICAgICAgICAgX190eXBlbmFtZVxuICAgICAgICAgIH1cbiAgICAgICAgICB1cGRhdGVkX2F0XG4gICAgICAgICAgX190eXBlbmFtZVxuICAgICAgICB9XG4gICAgICAgIF9fdHlwZW5hbWVcbiAgICAgIH1cbiAgICAgIF9fdHlwZW5hbWVcbiAgICB9XG4gICAgdXBkYXRlZF9hdFxuICAgIF9fdHlwZW5hbWVcbiAgfVxuICBfX3R5cGVuYW1lXG59XG5cblxuXG5mcmFnbWVudCBUZWFtTGlua1dpdGhNaW5pUHJvZmlsZSBvbiBUZWFtIHtcbiAgaWRcbiAgaGFuZGxlXG4gIG5hbWVcbiAgX190eXBlbmFtZVxufVxuXG5mcmFnbWVudCBUZWFtVGFibGVBdmVyYWdlQm91bnR5IG9uIFRlYW0ge1xuICBpZFxuICBjdXJyZW5jeVxuICBhdmVyYWdlX2JvdW50eV9sb3dlcl9hbW91bnRcbiAgYXZlcmFnZV9ib3VudHlfdXBwZXJfYW1vdW50XG4gIF9fdHlwZW5hbWVcbn1cblxuZnJhZ21lbnQgVGVhbVRhYmxlTWluaW11bUJvdW50eSBvbiBUZWFtIHtcbiAgaWRcbiAgY3VycmVuY3lcbiAgYmFzZV9ib3VudHlcbiAgX190eXBlbmFtZVxufVxuXG5mcmFnbWVudCBUZWFtVGFibGVSZXNvbHZlZFJlcG9ydHMgb24gVGVhbSB7XG4gIGlkXG4gIHJlc29sdmVkX3JlcG9ydF9jb3VudFxuICBfX3R5cGVuYW1lXG59XG5cbmZyYWdtZW50IE15SGFja2VyT25lU3ViSGVhZGVyIG9uIFVzZXIge1xuICBpZFxuICBoYXNfY2hlY2tsaXN0X2NoZWNrX3Jlc3BvbnNlc1xuICBzb2Z0X2xhdW5jaF9pbnZpdGF0aW9ucyhzdGF0ZTogb3Blbikge1xuICAgIHRvdGFsX2NvdW50XG4gICAgX190eXBlbmFtZVxuICB9XG4gIF9fdHlwZW5hbWVcbn1cbiIKfQoKCgo="
-    query = json.loads(base64.b64decode(PRIV_PROG_QUERY).decode('utf-8'))
+    CSRF_TOKEN = csrf_token
+    ### expanded this using here-doc syntax for easier merging
+    PRIV_PROG_QUERY = '''
+        {
+            "operationName": "MyProgramsQuery",
+            "variables": {
+                "where":{"submission_state":{"_eq":"open"}},
+                "count": 50,
+                "orderBy": null,
+                "secureOrderBy": {
+                    "started_accepting_at": {
+                        "_direction": "DESC"
+                    }
+                },
+                "cursor": ""
+            },
+            "query": "query MyProgramsQuery($cursor: String, $count: Int, $where: FiltersTeamFilterInput, $orderBy: TeamOrderInput, $secureOrderBy: FiltersTeamFilterOrder) {\n  me {\n    id\n    ...MyHackerOneSubHeader\n    __typename\n  }\n  teams(first: $count, after: $cursor, order_by: $orderBy, secure_order_by: $secureOrderBy, where: $where) {\n    pageInfo {\n      endCursor\n      hasNextPage\n      __typename\n    }\n    edges {\n      cursor\n      node {\n        id\n        handle\n        name\n        currency\n        team_profile_picture: profile_picture(size: medium)\n        submission_state\n        triage_active\n        url\n        offers_bounties\n      allows_bounty_splitting\n  average_bounty_lower_amount\n        average_bounty_upper_amount\n        top_bounty_lower_amount\n        top_bounty_upper_amount\n        formatted_total_bounties_paid_prefix\n        formatted_total_bounties_paid_amount\n        resolved_report_count\n        formatted_bounties_paid_last_90_days\n        reports_received_last_90_days\n        last_report_resolved_at\n most_recent_sla_snapshot {\n    id\n    first_response_time: average_time_to_first_program_response\n    triage_time: average_time_to_report_triage\n    bounty_time: average_time_to_bounty_awarded\n    resolution_time: average_time_to_report_resolved\n    __typename\n  }\n        only_cleared_hackers\n        state\n        started_accepting_at\n        number_of_reports_for_user\n        number_of_valid_reports_for_user\n        bounty_earned_for_user\n        last_invitation_accepted_at_for_user\n        bookmarked\n        external_program {\n          id\n          __typename\n        }\n        ...TeamLinkWithMiniProfile\n        ...TeamTableAverageBounty\n        ...BountyTableTeam\n        ...TeamTableMinimumBounty\n        ...TeamTableResolvedReports\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment BountyTableTeam on Team {\n  id\n  handle\n  bounty_table {\n    id\n    low_label\n    medium_label\n    high_label\n    critical_label\n    description\n        bounty_table_rows(first: 100) {\n      edges {\n        node {\n          id\n          low\n          medium\n          high\n          critical\n          smart_rewards_start_at\n          structured_scope {\n            id\n            asset_identifier\n            __typename\n          }\n          updated_at\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    updated_at\n    __typename\n  }\n  __typename\n}\n\n\n\nfragment TeamLinkWithMiniProfile on Team {\n  id\n  handle\n  name\n  __typename\n}\n\nfragment TeamTableAverageBounty on Team {\n  id\n  currency\n  average_bounty_lower_amount\n  average_bounty_upper_amount\n  __typename\n}\n\nfragment TeamTableMinimumBounty on Team {\n  id\n  currency\n  base_bounty\n  __typename\n}\n\nfragment TeamTableResolvedReports on Team {\n  id\n  resolved_report_count\n  __typename\n}\n\nfragment MyHackerOneSubHeader on User {\n  id\n  has_checklist_check_responses\n  soft_launch_invitations(state: open) {\n    total_count\n    __typename\n  }\n  __typename\n}\n"
+        }
+    '''
+    query = json.loads(PRIV_PROG_QUERY.replace("\n",""))
     last_cursor = ""
     
     if H1_XAUTH_TOKEN == None:
+        # note, it seems no longer possible to get unauthenticated access - leaving for now - @pmnh
         hdrs = {"Content-type": "application/json", 
             "Host": "hackerone.com",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
             "Accept": "*/*"}
     else:
-        hdrs = {"X-Auth-Token": H1_XAUTH_TOKEN,
+        hdrs = {"Cookie": "__Host-session="+H1_XAUTH_TOKEN,
+            "X-Csrf-Token": CSRF_TOKEN,
             "Content-type": "application/json", 
             "Host": "hackerone.com",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
@@ -73,6 +101,7 @@ def get_programinfo(token):
     
     now = datetime.now()
     if H1_XAUTH_TOKEN == None:
+        # note, it seems no longer possible to get unauthenticated access - leaving for now - @pmnh
         filename = "h1stats-%s.csv"%(str(int(time.time())))
     else:
         filename = "h1stats-PRIVATE-%s.csv"%(str(int(time.time())))
@@ -231,14 +260,15 @@ if __name__ == "__main__":
     print("                      defparam   ")
     print("")
 
-    if len(sys.argv) == 1:
-        print("[+] No session cookie specified")
-        print("[+] Collecting public data...")
-        graphql_token = None
-    else:
-        host_session_token = sys.argv[1]
-        print("[+] Using specified session cookie")
-        print("[+] Collecting public and private data...")
-        graphql_token = get_h1_graphql_token(host_session_token)
+    # if len(sys.argv) == 1:
+    # note, it seems no longer possible to get unauthenticated access - leaving for now - @pmnh
+    #     print("[+] No session cookie specified")
+    #     print("[+] Collecting public data...")
+    #     graphql_token = None
+    # else:
+    host_session_token = sys.argv[1]
+    print("[+] Using specified session cookie")
+    print("[+] Collecting public and private data...")
+    csrf_token = get_csrf_token(host_session_token)
         
-    get_programinfo(graphql_token)
+    get_programinfo(host_session_token, csrf_token)
