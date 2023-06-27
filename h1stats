@@ -5,19 +5,19 @@
 # Authors: defparam
 #
 # MIT License
-# 
+#
 # Copyright (c) 2021 defparam
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
 # to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 # copies of the Software, and to permit persons to whom the Software is
 # furnished to do so, subject to the following conditions:
-# 
+#
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -41,7 +41,7 @@ def diff_month(d1, d2):
 def get_csrf_token(hostsession):
     print("[+] Getting CSRF token, if you get an error here it likely means you don't have a valid session cookie")
     hdrs = {"Cookie": "__Host-session="+hostsession,
-    "Content-type": "application/json", 
+    "Content-type": "application/json",
     "Host": "hackerone.com",
     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
     "Accept": "*/*"}
@@ -76,54 +76,56 @@ def get_programinfo(token, csrf_token):
                 },
                 "cursor": ""
             },
-            "query": "query MyProgramsQuery($cursor: String, $count: Int, $where: FiltersTeamFilterInput, $orderBy: TeamOrderInput, $secureOrderBy: FiltersTeamFilterOrder) {\n  me {\n    id\n    ...MyHackerOneSubHeader\n    __typename\n  }\n  teams(first: $count, after: $cursor, order_by: $orderBy, secure_order_by: $secureOrderBy, where: $where) {\n    pageInfo {\n      endCursor\n      hasNextPage\n      __typename\n    }\n    edges {\n      cursor\n      node {\n        id\n        handle\n        name\n        currency\n        team_profile_picture: profile_picture(size: medium)\n        submission_state\n        triage_active\n        url\n        offers_bounties\n      allows_bounty_splitting\n  average_bounty_lower_amount\n        average_bounty_upper_amount\n        top_bounty_lower_amount\n        top_bounty_upper_amount\n        formatted_total_bounties_paid_prefix\n        formatted_total_bounties_paid_amount\n        resolved_report_count\n        formatted_bounties_paid_last_90_days\n        reports_received_last_90_days\n        last_report_resolved_at\n most_recent_sla_snapshot {\n    id\n    first_response_time: average_time_to_first_program_response\n    triage_time: average_time_to_report_triage\n    bounty_time: average_time_to_bounty_awarded\n    resolution_time: average_time_to_report_resolved\n    __typename\n  }\n        only_cleared_hackers\n        state\n        started_accepting_at\n        number_of_reports_for_user\n        number_of_valid_reports_for_user\n        bounty_earned_for_user\n        last_invitation_accepted_at_for_user\n        bookmarked\n        external_program {\n          id\n          __typename\n        }\n        ...TeamLinkWithMiniProfile\n        ...TeamTableAverageBounty\n        ...BountyTableTeam\n        ...TeamTableMinimumBounty\n        ...TeamTableResolvedReports\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment BountyTableTeam on Team {\n  id\n  handle\n  bounty_table {\n    id\n    low_label\n    medium_label\n    high_label\n    critical_label\n    description\n        bounty_table_rows(first: 100) {\n      edges {\n        node {\n          id\n          low\n          medium\n          high\n          critical\n          smart_rewards_start_at\n          structured_scope {\n            id\n            asset_identifier\n            __typename\n          }\n          updated_at\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    updated_at\n    __typename\n  }\n  __typename\n}\n\n\n\nfragment TeamLinkWithMiniProfile on Team {\n  id\n  handle\n  name\n  __typename\n}\n\nfragment TeamTableAverageBounty on Team {\n  id\n  currency\n  average_bounty_lower_amount\n  average_bounty_upper_amount\n  __typename\n}\n\nfragment TeamTableMinimumBounty on Team {\n  id\n  currency\n  base_bounty\n  __typename\n}\n\nfragment TeamTableResolvedReports on Team {\n  id\n  resolved_report_count\n  __typename\n}\n\nfragment MyHackerOneSubHeader on User {\n  id\n  has_checklist_check_responses\n  soft_launch_invitations(state: open) {\n    total_count\n    __typename\n  }\n  __typename\n}\n"
+            "query": "query MyProgramsQuery($cursor: String, $count: Int, $where: FiltersTeamFilterInput, $orderBy: TeamOrderInput, $secureOrderBy: FiltersTeamFilterOrder) {\n  me {\n    id\n    ...MyHackerOneSubHeader\n    __typename\n  }\n  teams(first: $count, after: $cursor, order_by: $orderBy, secure_order_by: $secureOrderBy, where: $where) {\n    pageInfo {\n      endCursor\n      hasNextPage\n      __typename\n    }\n    edges {\n      cursor\n      node {\n        id\n        handle\n        name\n        currency\n        team_profile_picture: profile_picture(size: medium)\n        submission_state\n        triage_active\n        url\n        offers_bounties\n      allows_bounty_splitting\n  average_bounty_lower_amount\n        average_bounty_upper_amount\n        top_bounty_lower_amount\n        top_bounty_upper_amount\n        formatted_total_bounties_paid_prefix\n        formatted_total_bounties_paid_amount\n        resolved_report_count\n        formatted_bounties_paid_last_90_days\n        reports_received_last_90_days\n        last_report_resolved_at\n most_recent_sla_snapshot {\n    id\n    first_response_time: average_time_to_first_program_response\n    triage_time: average_time_to_report_triage\n    bounty_time: average_time_to_bounty_awarded\n    resolution_time: average_time_to_report_resolved\n    __typename\n  }\n        only_cleared_hackers\n        state\n        started_accepting_at\n        number_of_reports_for_user\n        number_of_valid_reports_for_user\n        bounty_earned_for_user\n        last_invitation_accepted_at_for_user\n        bookmarked\n        external_program {\n          id\n          __typename\n        }\n        ...TeamLinkWithMiniProfile\n        ...TeamTableAverageBounty\n        ...BountyTableTeam\n        ...TeamTableMinimumBounty\n        ...TeamTableResolvedReports\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}\n\nfragment BountyTableTeam on Team {\n  id\n  handle\n  bounty_table {\n    id\n    low_label\n    medium_label\n    high_label\n    critical_label\n    description\n        bounty_table_rows(first: 100) {\n      edges {\n        node {\n          id\n          low\n          medium\n          high\n          critical\n          smart_rewards_start_at\n          structured_scope {\n            id\n            asset_identifier\n            __typename\n          }\n          updated_at\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    updated_at\n    __typename\n  }\n  __typename\n}\n\n\n\nfragment TeamLinkWithMiniProfile on Team {\n  id\n  handle\n  name\n  __typename\n}\n\nfragment TeamTableAverageBounty on Team {\n  id\n  currency\n  average_bounty_lower_amount\n  average_bounty_upper_amount\n  __typename\n}\n\nfragment TeamTableMinimumBounty on Team {\n  id\n  currency\n  base_bounty\n  __typename\n}\n\nfragment TeamTableResolvedReports on Team {\n  id\n  resolved_report_count\n  __typename\n}\n\nfragment MyHackerOneSubHeader on User {\n  id\n  soft_launch_invitations(state: open) {\n    total_count\n    __typename\n  }\n  __typename\n}\n"
         }
     '''
     query = json.loads(PRIV_PROG_QUERY.replace("\n",""))
     last_cursor = ""
-    
+
     if H1_XAUTH_TOKEN == None:
         # note, it seems no longer possible to get unauthenticated access - leaving for now - @pmnh
-        hdrs = {"Content-type": "application/json", 
+        hdrs = {"Content-type": "application/json",
             "Host": "hackerone.com",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
             "Accept": "*/*"}
     else:
         hdrs = {"Cookie": "__Host-session="+H1_XAUTH_TOKEN,
             "X-Csrf-Token": CSRF_TOKEN,
-            "Content-type": "application/json", 
+            "Content-type": "application/json",
             "Host": "hackerone.com",
+            "Origin": "https://hackerone.com",
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
-            "Accept": "*/*"}        
-        
+            "Accept": "*/*"}
+
     print("[+] Please wait... (this may take several minutes)")
     print("[+] Collecting...\r", flush=1, end='')
-    
+
     now = datetime.now()
     if H1_XAUTH_TOKEN == None:
         # note, it seems no longer possible to get unauthenticated access - leaving for now - @pmnh
         filename = "h1stats-%s.csv"%(str(int(time.time())))
     else:
         filename = "h1stats-PRIVATE-%s.csv"%(str(int(time.time())))
-        
+
     with open(filename,"wb") as f:
         f.write("Program Name,URL,Program Type,Clear Program,Offers Bounties,Bounty Splitting,Max Critical,Max High,Max Medium,Max Low,Average Bounty Max,Average Bounty Min,Top Bounty Max,Top Bounty Min,Resolved Reports,Reports Received in 90 Days,Total Bounties Paid (USD),Total Bounties Paid in 90 Days (USD),Avg Time to First Response (Hours),Avg Time to Triage (Hours),Avg Time to Bounty (Hours),Avg Time to Resolution (Hours),Progam Age (Months),Days Since Last Report,Invitation Accepted Days\n".encode('utf8'))
         progcount = 0
         while(1):
             query["variables"]["cursor"] = last_cursor
-            
+
             resp = requests.post('https://hackerone.com/graphql',headers=hdrs,data=json.dumps(query))
             data = json.loads(resp.text)
             progcount += len(data["data"]["teams"]["edges"])
             print("[+] Collecting... (%d programs)                              \r"%(progcount), flush=1, end='')
-            
+
+            # if this line fails the authentication or CSRF is probably wrong
             if len(data["data"]["teams"]["edges"]) == 0:
                 print("\n[+] Wrote all data to: %s"%filename)
                 if H1_XAUTH_TOKEN != None:
                     print("[+] Warning: this data contains private information under NDA, do not publish!")
                 print("[+] Done!")
                 break
-             
+
             for edge in data["data"]["teams"]["edges"]:
                 last_cursor = edge["cursor"]
                 url = edge["node"]["url"]
@@ -134,11 +136,11 @@ def get_programinfo(token, csrf_token):
                 bounty_splitting = "No"
                 if edge["node"]["allows_bounty_splitting"]:
                     bounty_splitting = "Yes"
-                    
+
                 state = "PRIVATE"
                 if edge["node"]["state"] == "public_mode":
                     state = "Public"
-                
+
                 maxcrit = "0"
                 maxhigh = "0"
                 maxmed = "0"
@@ -161,48 +163,48 @@ def get_programinfo(token, csrf_token):
                     abla = str(edge["node"]["average_bounty_lower_amount"])
                 else:
                     abla = "0"
-                    
+
                 if edge["node"]["average_bounty_upper_amount"] != None:
                     abua = str(edge["node"]["average_bounty_upper_amount"])
                 else:
                     abua = "0"
-                    
+
                 if edge["node"]["top_bounty_lower_amount"] != None:
                     tbla = str(edge["node"]["top_bounty_lower_amount"])
                 else:
                     tbla = "0"
-                    
+
                 if edge["node"]["top_bounty_upper_amount"] != None:
                     tbua = str(edge["node"]["top_bounty_upper_amount"])
                 else:
                     tbua = "0"
-                    
+
                 if edge["node"]["formatted_total_bounties_paid_amount"] != None:
                     tbp = str(edge["node"]["formatted_total_bounties_paid_amount"])
                 else:
                     tbp = "0"
-                    
+
                 if edge["node"]["formatted_bounties_paid_last_90_days"] != None:
                     tbp90 = str(edge["node"]["formatted_bounties_paid_last_90_days"])
                 else:
                     tbp90 = "0"
-                    
-                if edge["node"]["most_recent_sla_snapshot"] != None: 
+
+                if edge["node"]["most_recent_sla_snapshot"] != None:
                     if edge["node"]["most_recent_sla_snapshot"]["first_response_time"] != None:
                         frt = str(edge["node"]["most_recent_sla_snapshot"]["first_response_time"])
                     else:
                         frt = "0.0"
-                        
+
                     if edge["node"]["most_recent_sla_snapshot"]["triage_time"] != None:
                         tt = str(edge["node"]["most_recent_sla_snapshot"]["triage_time"])
                     else:
                         tt = "0.0"
-                        
+
                     if edge["node"]["most_recent_sla_snapshot"]["bounty_time"] != None:
                         bt = str(edge["node"]["most_recent_sla_snapshot"]["bounty_time"])
                     else:
                         bt = "0.0"
-                        
+
                     if edge["node"]["most_recent_sla_snapshot"]["resolution_time"] != None:
                         rt = str(edge["node"]["most_recent_sla_snapshot"]["resolution_time"])
                     else:
@@ -212,21 +214,21 @@ def get_programinfo(token, csrf_token):
                     tt = "0.0"
                     bt = "0.0"
                     rt = "0.0"
-                    
-                    
-                    
+
+
+
                 rrc = edge["node"]["resolved_report_count"]
                 if rrc == None:
                     rrc = 0
-                    
+
                 rrc90 = edge["node"]["reports_received_last_90_days"]
                 if rrc90 == None:
                     rrc90 = 0
-                    
+
                 offers = "No"
                 if edge["node"]["offers_bounties"]:
                     offers = "Yes"
-                
+
                 # last_invitation_accepted_at_for_user
                 try:
                     invitation_accepted_at    = edge["node"]["last_invitation_accepted_at_for_user"][0:10]
@@ -238,16 +240,16 @@ def get_programinfo(token, csrf_token):
                 started_accepting_at    = edge["node"]["started_accepting_at"][0:10]
                 terms = started_accepting_at.split('-')
                 progage = str(diff_month(datetime.now(), datetime(int(terms[0]),int(terms[1]),int(terms[2]))))
-                    
-                try:    
+
+                try:
                     last_report_resolved_at    = edge["node"]["last_report_resolved_at"][0:10]
                     terms = last_report_resolved_at.split('-')
                     dslr = str((datetime.now() - datetime(int(terms[0]),int(terms[1]),int(terms[2]))).days)
                 except:
                     dslr = "N/A"
-                
+
                 f.write(("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n"%(name,url,state,clear,offers,bounty_splitting,maxcrit,maxhigh,maxmed,maxlow,abua,abla,tbua,tbla,rrc,rrc90,tbp,tbp90,frt,tt,bt,rt,progage,dslr,invacc)).encode('utf8'))
-            
+
 
 
 if __name__ == "__main__":
@@ -270,5 +272,5 @@ if __name__ == "__main__":
     print("[+] Using specified session cookie")
     print("[+] Collecting public and private data...")
     csrf_token = get_csrf_token(host_session_token)
-        
+
     get_programinfo(host_session_token, csrf_token)
