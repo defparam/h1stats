@@ -82,14 +82,7 @@ def get_programinfo(token, csrf_token):
     query = json.loads(PRIV_PROG_QUERY.replace("\n",""))
     last_cursor = ""
 
-    if H1_XAUTH_TOKEN == None:
-        # note, it seems no longer possible to get unauthenticated access - leaving for now - @pmnh
-        hdrs = {"Content-type": "application/json",
-            "Host": "hackerone.com",
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)",
-            "Accept": "*/*"}
-    else:
-        hdrs = {"Cookie": "__Host-session="+H1_XAUTH_TOKEN,
+    hdrs = {"Cookie": "__Host-session="+H1_XAUTH_TOKEN,
             "X-Csrf-Token": CSRF_TOKEN,
             "Content-type": "application/json",
             "Host": "hackerone.com",
@@ -101,7 +94,7 @@ def get_programinfo(token, csrf_token):
     print("[+] Collecting...\r", flush=1, end='')
 
     now = datetime.now()
-    if H1_XAUTH_TOKEN == None:
+    if H1_XAUTH_TOKEN == "":
         # note, it seems no longer possible to get unauthenticated access - leaving for now - @pmnh
         filename = "h1stats-%s.csv"%(str(int(time.time())))
     else:
@@ -259,16 +252,15 @@ if __name__ == "__main__":
     print(" | | | | |___) | || (_| | |_\__ \\")
     print(" |_| |_|_|____/ \__\__,_|\__|___/")
     print("")
-    print("                      defparam   ")
+    print("                 defparam, pmnh   ")
     print("")
 
-    # if len(sys.argv) == 1:
-    # note, it seems no longer possible to get unauthenticated access - leaving for now - @pmnh
-    #     print("[+] No session cookie specified")
-    #     print("[+] Collecting public data...")
-    #     graphql_token = None
-    # else:
-    host_session_token = sys.argv[1]
+    if len(sys.argv) == 1:
+        print("[+] No session cookie specified")
+        print("[+] Collecting public data...")
+        host_session_token = ""
+    else:
+        host_session_token = sys.argv[1]
     print("[+] Using specified session cookie")
     print("[+] Collecting public and private data...")
     csrf_token = get_csrf_token(host_session_token)
