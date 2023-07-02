@@ -38,8 +38,7 @@ pip install -r requirements.txt
 ```
 
 ## Usage
-normal usage (public programs): (Note: As of the end of 2022, this no longer works - you _must_ supply a valid token of an authenticated session)
-**python3 h1stats**
+normal usage (public programs): **python3 h1stats**
 
 authenticated usage (public and private programs):
 **python3 h1stats [\<Your HackerOne __Host-session Token\>]**
