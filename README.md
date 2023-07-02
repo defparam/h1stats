@@ -1,10 +1,10 @@
 # h1stats - h1 Program Stats Scraper
 This python3 script will call out to HackerOne's graphql API and scrape all currently active programs for information and stats on every h1 program. All programs and their stats get tabulated into a generated CSV file. From here you can compare and contrast all program stats to pick high fidelity targets. Furthermore, you can supply your h1 session cookie to the script to also compile in all private programs to the CSV.
 
-# Thanks
+## Thanks
 @pmnh -- for maintaining a compatability fork
 
-Data Collected:
+# Data Collected:
  - Program Name
  - Program URL
  - Program Type (Public or Private)
